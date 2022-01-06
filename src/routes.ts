@@ -5,13 +5,14 @@ import {OutputType} from "./types/OutType.ts"
 import {Hometax} from "./modules/Hometax.ts"
 import {fromFileUrl } from "https://deno.land/std@0.120.0/path/mod.ts"
 import {readableStreamFromReader } from "https://deno.land/std@0.120.0/streams/conversion.ts"
+import {sliceFunc} from "./common/commonFunc.ts";
 
 // import {createBodyParser, JsonBodyParser} from "https://deno.land/x/body_parser@v0.0.1/mod.ts"
 
 
 const router = new Router();
-  
-
+var hometax:Hometax ;
+var name = "";
 router.get("/", async (context) => {
 
         const u = new URL("../public/html/main.html", import.meta.url);
@@ -31,7 +32,7 @@ router.get("/", async (context) => {
         const {value} = await context.request.body({type:"form-data"});
         const formData = await value.read();
 
-
+        name = formData.fields.userName;
 
         let input:Input = {
             Module:formData.fields.moduleName,
@@ -61,25 +62,62 @@ router.get("/", async (context) => {
             
             const moduleName:string = input.Module;
             if(moduleName === "Hometax"){
-                const hometax = new Hometax();
+                hometax = new Hometax();
                 if(input.Job === '로그인' || input.Job === 'login' ){
                     console.log("[routes] routes.js to Login")
                     var resultTest = await hometax.login(input.Input.userName ,input.Input.phoneNum ,input.Input.ssn1 ,input.Input.ssn2);
+
+                    console.log("resultTest: " + resultTest);
+                    if(resultTest === "OK"){
+
+                       const u = new URL("../public/html/responsing.html", import.meta.url);
+                        // server launched by deno run ./server.ts
+                        const file = await Deno.open(fromFileUrl(u));
+
+                        context.response.status= 200;
+                        context.response.body= readableStreamFromReader(file);
+                        
+                    }
+
                     
                 }
-            }
+            }else{
             
-            var json :OutputType = {
-                ErrorCode : "00000000",
-                ErrorMessage : "정상조회 되었습니다.",
-                Result:""
+                var json :OutputType = {
+                    ErrorCode : "00000000",
+                    ErrorMessage : "정상조회 되었습니다.",
+                    Result:""
+                }
+    
+                context.response.status = 200;
+                context.response.body = json;
+    
             }
-
-            context.response.status = 200;
-            context.response.body = json;
             
         }
-    });
+    })
+    .post('/okResponse', async (context) =>{
+        console.log("okResponse init");
+        var result = await hometax.소득조회();
+        
+        var earnedIncome = sliceFunc(result, "<erinSumAmt>", "</erinSumAmt>");
+        var finIncome = sliceFunc(result, "<cfinSumAmt>", "</cfinSumAmt>");
+
+        console.log("'"+name+"'님의 근로소득은  '"+earnedIncome+"'입니다.")
+        console.log("'"+name+"'님의 금융소득은  '"+finIncome+"'입니다.")
+
+        let jsonRes = {
+            "근로소득": earnedIncome,
+            "금융소득":finIncome
+        }
+
+        context.response.status = 200;
+        context.response.body = jsonRes;
+        
+        console.log("okResponse 소득조회 끝");
+
+
+    })
 
 
 export default router;
