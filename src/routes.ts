@@ -31,34 +31,11 @@ router.get("/", async (context) => {
         const {value} = await context.request.body({type:"form-data"});
         const formData = await value.read();
 
-        console.log()
-        // var test = await body.value
-        console.log()
-        console.log(formData.fields.moduleName);
-        console.log(formData.fields.job);
-        console.log(formData.fields.userName);
-        console.log(formData.fields.phoneNum);
-        console.log(formData.fields.ssn1);
-        console.log(formData.fields.ssn2);
-        
 
-        // var input:Input = test;
-
-
-        // // let inputTemp = await body.value;
-        // var result = await bodyParser(context.request);
-
-        // console.log("body: "+result);
-        // let inputType :HomeTaxInputType= {
-        //     userName: body.userName,
-        //     phoneNum: body.phoneNum,
-        //     ssn1: body.ssn1,
-        //     ssn2: body.ssn2,
-        // }
 
         let input:Input = {
             Module:formData.fields.moduleName,
-            Job:formData.fields.Job,
+            Job:formData.fields.job,
             Input:{
                 userName:formData.fields.userName,
                 phoneNum:formData.fields.phoneNum,
@@ -67,22 +44,29 @@ router.get("/", async (context) => {
             }
 
         };
-        // console.log("body.Module: "+ body.Module);
-        // console.log("body.Job: "+ body.Job);
+
+        console.log(input.Module)
+        console.log(input.Job)
+        console.log(input.Input.userName)
+        console.log(input.Input.phoneNum)
+        console.log(input.Input.ssn2)
+
         if(!input.Input.userName || !input.Input.phoneNum || !input.Input.ssn1 || !input.Input.ssn2 ){
-            console.log("input.Input.userName: "+ input.Input.userName);
-            console.log("input.Input.phoneNum: "+ input.Input.phoneNum);
-            console.log("input.Input.ssn1: "+ input.Input.ssn1);
-            console.log("input.Input.ssn2: "+ input.Input.ssn2);
-            
+            console.log("input is empty")
             context.response.status = 400;
             context.response.body = "입력값을 입력하지 않았습니다."
+            return;
         }else{
+            console.log("input is Ok")
             
             const moduleName:string = input.Module;
             if(moduleName === "Hometax"){
                 const hometax = new Hometax();
-                var resultTest = await hometax.login("정진우", "01082271995", "930616", "1268217");
+                if(input.Job === '로그인' || input.Job === 'login' ){
+                    console.log("[routes] routes.js to Login")
+                    var resultTest = await hometax.login(input.Input.userName ,input.Input.phoneNum ,input.Input.ssn1 ,input.Input.ssn2);
+                    
+                }
             }
             
             var json :OutputType = {

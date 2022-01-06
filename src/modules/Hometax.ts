@@ -6,11 +6,11 @@ export class Hometax {
     constructor(){
         
     }
-    login(name:string, phoneNum:string, ss1:string, ssn2:string){
+    async login(name:string, phoneNum:string, ss1:string, ssn2:string){
         
         this.path = "/gpin/v1/request_tx";
-
-        var result = axiod({
+        console.log("[Hometax] login init!");
+        var result = await axiod({
             method: 'post',
             url: this.host+this.path,
             data:{
@@ -20,7 +20,8 @@ export class Hometax {
             }
           });
         
-          console.log("POST result: "+ result);
+          console.log("POST result: "+ result.data);
+          
 
         return "200"
         
