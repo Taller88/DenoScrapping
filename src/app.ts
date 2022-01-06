@@ -1,13 +1,19 @@
 
 import { Application } from "https://deno.land/x/oak/mod.ts";
 import router from "./routes.ts";
-
+import staticFiles from "https://deno.land/x/static_files@1.1.4/mod.ts"
+import {
+  opine,
+  json,
+  urlencoded,
+} from "https://deno.land/x/opine@0.26.0/mod.ts";
 class App {
   app;
 
   constructor() {
     this.app = new Application();
 
+    
     this.initializeMiddlewares();
     this.initializeRouting();
   }
@@ -26,7 +32,7 @@ class App {
   initializeMiddlewares() {
     this.app.use(router.routes());
     this.app.use(router.allowedMethods());
-    
+    this.app.use(staticFiles("public"))
   }
 
 
