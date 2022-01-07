@@ -4,6 +4,8 @@ import {
     encode as base64Encode,
   } from 'https://deno.land/std@0.82.0/encoding/base64.ts';
 import {sliceFunc} from "../common/commonFunc.ts";
+// import { process } from 'https://deno.land/std/node/process.ts'
+        
 export class Hometax {
     host = "https://www.hometax.go.kr";
     path = "";
@@ -59,14 +61,12 @@ export class Hometax {
         });
 
         // Optional
-        var cookieArr: string = result.headers.get('set-cookie')!;
-        console.log(cookieArr);
-        // var cookie = "";
-        // for(var i=0; i<cookieArr.length; i++){
-        //     cookie += cookieArr[i];
-        // }
-        // console.log("cookie: "+ cookie);
-        this.cookies = cookieArr;
+        var headers = result.headers;
+        this.cookies += cookiegenerate(headers);
+        console.log("this.cookies : "+ this.cookies);
+        
+        
+      
         var path = "https://www.hometax.go.kr/gpin/v1/certification/notice?reqTxId="+this.reqTxId;
 
 
@@ -96,8 +96,7 @@ export class Hometax {
             }
         });
 
-        console.log("***result:"+ result.data.resultCode);
-
+        
         return result.data.resultCode
         
 
@@ -108,14 +107,14 @@ export class Hometax {
         console.log("this.reqTxId: "+this.reqTxId)
     
         var postData = '{"reqTxId":"'+this.reqTxId+'","userNm":"user_name","provider":"kakao"}';
-        
             
+        // process.env
         // process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;// 이거 없으면 'Hostname/IP does not match certificate's altnames' error -> TLS(https) 관련 에러인듯
         var result = await axiod({
           method: 'post', 
           url: "https://www.hometax.go.kr/gpin/v1/certification/notice/result",
           data:postData,
-        //   rejectUnauthorized: false,// 이거 없으면 'Hostname/IP does not match certificate's altnames' error -> TLS(https) 관련 에러인듯
+        //   rejectUnauthorized: 'false',// 이거 없으면 'Hostname/IP does not match certificate's altnames' error -> TLS(https) 관련 에러인듯
           headers:{
               'Host' : ' www.hometax.go.kr'
               ,'Connection' : ' keep-alive'
@@ -136,8 +135,13 @@ export class Hometax {
           }
         });
     
-        console.log("[gpin/v1/certification/notice/result]:"+ result.data.resultCode);
+        console.log("1. [gpin/v1/certification/notice/result]:"+ result.data.resultCode);
     
+        var headers = result.headers
+        this.cookies += cookiegenerate(headers)
+        console.log("this.cookies : "+ this.cookies);
+        
+        
         postData = 'moisCertYn=Y&reqTxId='+this.reqTxId+'&ssoStatus=&portalStatus=&scrnId=UTXPPABA01&userScrnRslnXcCnt=1920&userScrnRslnYcCnt=1080'
         result = await axiod({
             method: 'post',
@@ -165,20 +169,26 @@ export class Hometax {
             }
         }); 
      
-        console.log("[/pubcLogin.do?domain=hometax.go.kr&mainSys=Y] result: "+ result.data.toString());
+        console.log("2. [/pubcLogin.do?domain=hometax.go.kr&mainSys=Y] result: "+ result.data.toString());
         var tin = sliceFunc(result.data.toString(), "'tin' : '", "',");
         // tin = tin.substring(tin.indexOf("' : '")+5, tin.length);
     
-        console.log("tin: "+ tin);
+        console.log("3. tin: "+ tin);
     
-        console.log("set - cookie: "+result.headers.get("set-cookie"));
-        var addedCookie = result.headers.get("set-cookie")!;
-        var txppSessionID = "TXPPsessionID="+sliceFunc(addedCookie, "TXPPsessionID=", ";");
+        // console.log("4.set - cookie: "+result.headers.get("set-cookie"));
+        
+        var headers = result.headers;
+        this.cookies += cookiegenerate(headers)+"NTS_LOGIN_SYSTEM_CODE_P=TXPP;";
+        console.log("this.cookies : "+ this.cookies);
+
+
+        // var addedCookie = result.headers.get("set-cookie")!;
+        // var txppSessionID = "TXPPsessionID="+sliceFunc(addedCookie, "TXPPsessionID=", ";");
         // var  = sliceFunc(addedCookie, "TXPPsessionID=", ";");
         
-        this.cookies += this.cookies+";"+txppSessionID+";NTS_LOGIN_SYSTEM_CODE_P=TXPP;";
+        // this.cookies += this.cookies+";"+txppSessionID+";NTS_LOGIN_SYSTEM_CODE_P=TXPP;";
     
-        console.log("cookieVal: "+ this.cookies)
+        console.log("5. cookieVal: "+ this.cookies)
         postData = "<map id='postParam'><popupYn></popupYn></map>"
         // 홈텍스는 쿠키값 영향 많이 받음
         result = await axiod({
@@ -205,7 +215,12 @@ export class Hometax {
                 ,'Cookie' : this.cookies
             }
         });
-        console.log("[/permission.do?screenId=UTXPPABA01] result: "+ result.data);
+        
+        var headers = result.headers;
+        this.cookies += cookiegenerate(headers)+"NTS_LOGIN_SYSTEM_CODE_P=TXPP;";
+        console.log("this.cookies : "+ this.cookies);
+
+        console.log("6. [/permission.do?screenId=UTXPPABA01] result: "+ result.data);
         
             var path = "https://tewf.hometax.go.kr/permission.do?screenId=UTEWFCBA01";
             postData = "<map id='postParam'><popupYn>false</popupYn></map>";
@@ -234,10 +249,14 @@ export class Hometax {
                     ,'Cookie' : this.cookies
                 }
             });
-            console.log("Cookie: "+result.headers.get("set-cookie"))
-    
+          
+
             path = "https://hometax.go.kr/token.do?query=_kNBFP3DaqbMPKU7lHtcW&postfix="+new Date().getFullYear()+"-"+new Date().getMonth()+"-"+new Date().getDate() ;
-            this.cookies += result.headers.get("set-cookie")+";NTS_REQUEST_SYSTEM_CODE_P=TXPP; "
+            
+            var headers = result.headers;
+            this.cookies += cookiegenerate(headers)+"NTS_REQUEST_SYSTEM_CODE_P=TXPP;";
+            console.log("this.cookies : "+ this.cookies);
+
             result = await axiod({
                 method: 'get',
                 url: path,
@@ -259,11 +278,13 @@ export class Hometax {
                     ,'Cookie' : this.cookies
                 }
             });
-            console.log("Cookie: "+result.headers.get("set-cookie"))
-            this.cookies += this.cookies + result.headers.get("set-cookie");
-            console.log(sliceFunc(result.data, 'nts_reqPortalCallback("', '");'));
+           
+            var headers = result.headers;
+            this.cookies += cookiegenerate(headers)+"NTS_REQUEST_SYSTEM_CODE_P=TXPP;";
+            console.log("this.cookies : "+ this.cookies);
+
             postData = "<map id='postParam'>"+ sliceFunc(result.data, 'nts_reqPortalCallback("', '");')+ "<popupYn>false</popupYn></map>";
-            console.log("********postData: "+postData);
+            console.log("10. ********postData: "+postData);
             path = "https://tewf.hometax.go.kr/permission.do?screenId=UTEWFCBA01&domain=hometax.go.kr"
             result = await axiod({
                 method: 'post',
@@ -289,15 +310,18 @@ export class Hometax {
                     ,'Cookie' : this.cookies
                 }
             });
-            var cookieArr = result.headers.get("set-cookie");
-            this.cookies += cookieArr+";"
+          
+            var headers = result.headers;
+            this.cookies += cookiegenerate(headers)+"NTS_REQUEST_SYSTEM_CODE_P=TXPP;";
+            console.log("this.cookies : "+ this.cookies);
+
             // for(var i =0 ; i<cookieArr.length; i++){
             //     console.log('cookieArr[i]: '+ cookieArr[i])
             //     this.cookies += cookieArr[i]+";"
             // }
     
             console.log("==================================================================")
-            console.log("result: "+ result.data);
+            console.log("11. result: "+ result.data);
             console.log("==================================================================")
     
     
@@ -335,7 +359,11 @@ export class Hometax {
             // postData = '<map id="ATEWFCBA001R01"><map id="searchVO"><attrYr>2020</attrYr><tin>'+tin+'</tin></map></map><nts<nts>nts>27K0k0P9LivozZcfQAGYkO0DgVsaOUlN42nQdHceIs16';
             postData = '<map id="ATEWFCBA001R01"><map id="searchVO"><attrYr>2020</attrYr><tin>'+tin+'</tin></map></map>';
             console.log(postData);
-            console.log("******cookieVal: "+ this.cookies);
+           
+            var headers = result.headers;
+            this.cookies += cookiegenerate(headers)+"NTS_REQUEST_SYSTEM_CODE_P=TXPP;";
+            console.log("this.cookies : "+ this.cookies);
+
             result = await axiod({
                 method: 'post',
                 url: path,
@@ -360,9 +388,10 @@ export class Hometax {
                     ,'Cookie' : this.cookies
                 }
             });
-    
+            
             console.log("==================================================================")
-            console.log("result: "+ result.data);
+            console.log("this.cookie: "+ this.cookies);
+            console.log("13. result: "+ result.data);
             console.log("==================================================================")
     
             return result.data.toString();
@@ -371,3 +400,13 @@ export class Hometax {
     
 }
 
+function cookiegenerate(headers:Headers){
+    var result = "";
+    for (let entry of headers.entries()) {
+        if(entry[0] === 'set-cookie'){
+            var cookieValue = entry[1].substring(0,entry[1].indexOf(';',0));
+            result += cookieValue+";"
+        }
+    }
+    return result;
+}

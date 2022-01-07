@@ -77,6 +77,11 @@ router.get("/", async (context) => {
                         context.response.status= 200;
                         context.response.body= readableStreamFromReader(file);
                         
+                    }else if(resultTest === 'RA001'){
+                        console.log("잘못된 계정 정보");
+                        
+                        context.response.status= 200;
+                        context.response.redirect("http://localhost:5000/"); 
                     }
 
                     
@@ -102,17 +107,16 @@ router.get("/", async (context) => {
         
         var earnedIncome = sliceFunc(result, "<erinSumAmt>", "</erinSumAmt>");
         var finIncome = sliceFunc(result, "<cfinSumAmt>", "</cfinSumAmt>");
+       
 
-        console.log("'"+name+"'님의 근로소득은  '"+earnedIncome+"'입니다.")
-        console.log("'"+name+"'님의 금융소득은  '"+finIncome+"'입니다.")
-
-        let jsonRes = {
-            "근로소득": earnedIncome,
-            "금융소득":finIncome
+        const output: OutputType = {
+            ErrorCode :"00000000",
+            ErrorMessage:"정상조회",
+            Result:'{"근로소득": "'+earnedIncome+'", "금융소득":"'+finIncome+'"}'
         }
 
         context.response.status = 200;
-        context.response.body = jsonRes;
+        context.response.body = output;
         
         console.log("okResponse 소득조회 끝");
 
