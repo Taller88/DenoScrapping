@@ -15,7 +15,6 @@ class App {
   }
 
   listen() {
-    // const port = process.env.PORT || 5000;
     console.log("http://localhost:5000/ 5000 port open")
     this.app.listen({ port: 5000 });
   }

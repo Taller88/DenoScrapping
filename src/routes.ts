@@ -7,9 +7,6 @@ import {fromFileUrl } from "https://deno.land/std@0.120.0/path/mod.ts"
 import {readableStreamFromReader } from "https://deno.land/std@0.120.0/streams/conversion.ts"
 import {sliceFunc} from "./common/commonFunc.ts";
 
-// import {createBodyParser, JsonBodyParser} from "https://deno.land/x/body_parser@v0.0.1/mod.ts"
-
-
 const router = new Router();
 var hometax:Hometax ;
 var name = "";

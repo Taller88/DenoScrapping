@@ -4,7 +4,6 @@ import {
     encode as base64Encode,
   } from 'https://deno.land/std@0.82.0/encoding/base64.ts';
 import {sliceFunc} from "../common/commonFunc.ts";
-// import { process } from 'https://deno.land/std/node/process.ts'
         
 export class Hometax {
     host = "https://www.hometax.go.kr";
@@ -54,7 +53,6 @@ export class Hometax {
                 'Sec-Fetch-Site' : 'same-origin',
                 'Sec-Fetch-Mode' : 'navigate',
                 'Sec-Fetch-Dest' : 'iframe',
-                // 'Referer' : "https://www.hometax.go.kr/websquare/popup.html?w2xPath=/ui/comm/a/d/UTECMADA02.xml&layerPopup=Y&popupID=UTECMADA02&w2xHome=/ui/pp/&'w2xDocumentRoot=",
                 'Accept-Encoding' : 'gzip, deflate, br',
                 'Accept-Language' : 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7'
             }

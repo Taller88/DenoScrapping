@@ -12,8 +12,6 @@ export function sliceFunc(text:string, to:string, from?:string){
         
     }
     
-//NTS_LOGIN_SYSTEM_CODE_P=TXPP;Domain=hometax.go.kr;Path=/,TXPPsessionID=ioyt0FdX69nxwFhLnSjLkszKFEyBaCRuOOEDpzL5XJEyyrVjpjuOIP7FYcOvO1XZ.tupiwsp28_servlet_TXPP01;Domain=.hometax.go.kr;Path=/
-
     return result;
 }
 
