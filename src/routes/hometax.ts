@@ -1,29 +1,17 @@
-import {Router} from "https://deno.land/x/oak@v10.1.0/mod.ts"
+
 import { v4 } from "https://deno.land/std/uuid/mod.ts";
-import {Input,HomeTaxInputType} from "./types/InputType.ts"
-import {OutputType} from "./types/OutType.ts"
-import {Hometax} from "./modules/Hometax.ts"
+import {Input,HomeTaxInputType} from "../types/InputType.ts"
+import {OutputType} from "../types/OutType.ts"
+import {Hometax} from "../modules/Hometax.ts"
 import {fromFileUrl } from "https://deno.land/std@0.120.0/path/mod.ts"
 import {readableStreamFromReader } from "https://deno.land/std@0.120.0/streams/conversion.ts"
-import {sliceFunc} from "./common/commonFunc.ts";
+import {sliceFunc} from "../common/commonFunc.ts";
+import {router} from "./index.ts"
 
-const router = new Router();
 var hometax:Hometax ;
 var name = "";
-router.get("/", async (context) => {
 
-        const u = new URL("../public/html/main.html", import.meta.url);
-        // server launched by deno run ./server.ts
-        const file = await Deno.open(fromFileUrl(u));
-
-        context.response.status= 200;
-        context.response.body= readableStreamFromReader(file)
-      
-})
-    .get("/books", (context) => {
-        context.response.body = "test";
-    })
-    .post("/execScrapping", async (context) =>{
+    router.post("/execScrapping", async (context) =>{
         console.log("execScrapping init")
         // 여기는 Top level이 아니기 때문에 async로 감싸주고 await로 받아야함 
         const {value} = await context.request.body({type:"form-data"});
